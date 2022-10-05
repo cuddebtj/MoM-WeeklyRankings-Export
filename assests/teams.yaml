@@ -1,0 +1,181 @@
+teams:
+  season: 
+    - 2012
+    - 2013
+    - 2014
+    - 2015
+    - 2016
+    - 2017
+    - 2018
+    - 2019
+    - 2020
+    - 2021
+    - 2022
+  game_id:
+    - 273
+    - 314
+    - 331
+    - 348
+    - 359
+    - 371
+    - 380
+    - 390
+    - 399
+    - 406
+    - 414
+  league_id:
+    - 777818
+    - 731544
+    - 793441
+    - 570821
+    - 185373
+    - 525547
+    - 236583
+    - 215172
+    - 12514
+    - 103661
+    - 77446
+  1: 
+    - "James"
+    - "Jake"
+    - "Ryan"
+    - "Tim"
+    - "Tim"
+    - "Tim"
+    - "Tim"
+    - "Tim"
+    - "Tim"
+    - "Tim"
+    - "Tim"
+  2: 
+    - "--hidden--"
+    - "Ryan"
+    - "Pat"
+    - "James"
+    - "James"
+    - "James"
+    - "Ryan"
+    - "Kevin"
+    - "Ryan"
+    - "Wes"
+    - "Wes"
+  3: 
+    - "Tim"
+    - "Pat"
+    - "Jeremy"
+    - "Ryan"
+    - "Ryan"
+    - "Ryan"
+    - "Chris"
+    - "Pete"
+    - "Kevin"
+    - "Kevin"
+    - "Kevin"
+  4: 
+    - "Wes"
+    - "James"
+    - "Jake"
+    - "Greg"
+    - "Greg"
+    - "Greg"
+    - "Kevin"
+    - "James"
+    - "Wes"
+    - "Ryan"
+    - "Greg"
+  5: 
+    - "Pat"
+    - "Tim"
+    - "Tim"
+    - "Pete"
+    - "Pete"
+    - "Pete"
+    - "James"
+    - "Jeremy"
+    - "Greg"
+    - "Jeremy"
+    - "Ryan"
+  6: 
+    - "Pete"
+    - "--hidden--"
+    - "James"
+    - "Kevin"
+    - "Kevin"
+    - "Kevin"
+    - "Wes"
+    - "Greg"
+    - "Pete"
+    - "Chris"
+    - "Pete"
+  7: 
+    - "Jake"
+    - "Wes"
+    - "Wes"
+    - "Pat"
+    - "Pat"
+    - "Pat"
+    - "Greg"
+    - "Chris"
+    - "Pat"
+    - "Greg"
+    - "Pat"
+  8: 
+    - "--hidden--"
+    - "Kevin"
+    - "Pete"
+    - "Wes"
+    - "Wes"
+    - "Wes"
+    - "Pat"
+    - "Pat"
+    - "James"
+    - "Pete"
+    - "Jeremy"
+  9: 
+    - "--hidden--"
+    - "--hidden--"
+    - "Kevin"
+    - "Jake"
+    - "Jake"
+    - "Chris"
+    - "Pete"
+    - "Ryan"
+    - "Chris"
+    - "Pat"
+    - "Chris"
+  10: 
+    - "--hidden--"
+    - "Greg"
+    - "Greg"
+    - "Jeremy"
+    - "Jeremy"
+    - "Jeremy"
+    - "Jeremy"
+    - "Wes"
+    - "Jeremy"
+    - "James"
+    - "Carter"
+  11: 
+    - "Ryan"
+    - "--hidden--"
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+  12: 
+    - "--hidden--"
+    - "--hidden--"
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
