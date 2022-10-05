@@ -141,7 +141,7 @@ def data_pipeline():
 
         reg_season(GAME_ID)
         post_season(GAME_ID)
-    print("Done")
 
-if __name__ == 'main':
+if __name__ == '__main__':
     data_pipeline()
+    print("Done")
