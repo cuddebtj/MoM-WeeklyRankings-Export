@@ -163,7 +163,7 @@ WHERE game_id = {str(game_id)}"
         ]
 
         reg_season["Wk W/L"] = np.where(
-            reg_season["winner_team_key"] == reg_season["team_a_team_key"], "W", "L"
+            reg_season["team_a_points"] > reg_season["team_b_points"], "W", "L"
         )
         reg_season["Wk Pts Rk"] = (
             reg_season.groupby(["week", "game_id"])["team_a_points"]
