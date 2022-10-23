@@ -11,24 +11,19 @@ from yfpy import get_logger
 from db_upload import DatabaseCursor
 from utils import data_upload
 from cust_logging import log_print
+from assests import PRIVATE, TEAMS
 
-PATH = list(Path().cwd().glob("**/private.yaml"))
-if PATH == []:
-    PATH = list(Path().cwd().parent.glob("**/private.yaml"))[0]
-else:
-    PATH = PATH[0]
+# PATH = list(Path().cwd().glob("**/private.yaml"))
+# if PATH == []:
+#     PATH = list(Path().cwd().parent.glob("**/private.yaml"))[0]
+# else:
+#     PATH = PATH[0]
 
-TEAMS_FILE = list(Path().cwd().glob("**/teams.yaml"))
-if TEAMS_FILE == []:
-    TEAMS_FILE = list(Path().cwd().parent.glob("**/teams.yaml"))[0]
-else:
-    TEAMS_FILE = TEAMS_FILE[0]
-
-LOG_PATH = list(Path().cwd().glob("**/logg.txt"))
-if LOG_PATH == []:
-    LOG_PATH = list(Path().cwd().parent.glob("**/logg.txt"))[0]
-else:
-    LOG_PATH = LOG_PATH[0]
+# TEAMS_FILE = list(Path().cwd().glob("**/teams.yaml"))
+# if TEAMS_FILE == []:
+#     TEAMS_FILE = list(Path().cwd().parent.glob("**/teams.yaml"))[0]
+# else:
+#     TEAMS_FILE = TEAMS_FILE[0]
 
 
 class league_season_data(object):
@@ -167,7 +162,7 @@ league_id"
                 df=league_metadata,
                 table_name="prod.metadata",
                 query=query,
-                path=PATH,
+                path=PRIVATE,
             )
 
             return league_metadata
@@ -288,7 +283,7 @@ league_id"
                 df=league_settings,
                 table_name="prod.settings",
                 query=query_1,
-                path=PATH,
+                path=PRIVATE,
             )
 
             return league_settings
@@ -552,7 +547,7 @@ team_a_team_key"
                 df=matchups,
                 table_name="raw.matchups",
                 query=query,
-                path=PATH,
+                path=PRIVATE,
             )
 
             return matchups
@@ -639,7 +634,7 @@ team_a_team_key"
             teams_standings["game_id"] = self.game_id
             teams_standings["league_id"] = self.league_id
 
-            with open(TEAMS_FILE, "r") as file:
+            with open(TEAMS, "r") as file:
                 c_teams = yaml.load(file, Loader=yaml.SafeLoader)
 
             correct_teams = pd.DataFrame.from_dict(c_teams["teams"])
@@ -787,7 +782,7 @@ team_id'
                 df=teams_standings,
                 table_name="raw.teams",
                 query=query,
-                path=PATH,
+                path=PRIVATE,
             )
 
             return teams_standings
@@ -806,7 +801,7 @@ team_id'
         """
         try:
             sql_query = f"SELECT DISTINCT max_teams FROM prod.settings WHERE game_id = {str(self.game_id)}"
-            teams = DatabaseCursor(PATH).copy_from_psql(sql_query)
+            teams = DatabaseCursor(PRIVATE).copy_from_psql(sql_query)
             teams = teams["max_teams"].values[0]
 
             team_points_weekly = pd.DataFrame()
@@ -943,7 +938,7 @@ team_id"
                 df=team_points_weekly,
                 table_name="raw.weekly_team_pts",
                 query=query,
-                path=PATH,
+                path=PRIVATE,
             )
 
             return team_points_weekly
@@ -964,7 +959,7 @@ team_id"
         try:
             response = unpack_data(self.yahoo_query.get_all_yahoo_fantasy_game_keys())
             try:
-                with open(TEAMS_FILE, "r") as file:
+                with open(TEAMS, "r") as file:
                     c_teams = yaml.load(file, Loader=yaml.SafeLoader)
 
                 keys = pd.DataFrame.from_dict(c_teams["teams"])
@@ -1000,7 +995,7 @@ team_id"
             data_upload(
                 df=game_keys,
                 table_name="prod.game_keys",
-                path=PATH,
+                path=PRIVATE,
                 query=query,
             )
 
@@ -1019,7 +1014,7 @@ team_id"
         stuff here
         """
         try:
-            game_keys = DatabaseCursor(PATH).copy_from_psql(
+            game_keys = DatabaseCursor(PRIVATE).copy_from_psql(
                 "SELECT DISTINCT game_id FROM prod.game_keys"
             )
             game_id = list(game_keys["game_id"])
@@ -1050,7 +1045,7 @@ team_id"
             data_upload(
                 df=weeks,
                 table_name="prod.nfl_weeks",
-                path=PATH,
+                path=PRIVATE,
                 query=query,
             )
 

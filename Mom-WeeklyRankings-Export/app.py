@@ -7,25 +7,20 @@ from time import time
 from utils import get_laborday, nfl_weeks_pull, game_keys_pull, reg_season, post_season
 from cust_logging import log_print
 from yahoo_data import league_season_data
+from assests import PRIVATE
 
 
 def data_pipeline():
     date = np.datetime64("today", "D")
 
-    PATH = list(Path().cwd().glob("**/private.yaml"))
-    if PATH == []:
-        PATH = list(Path().cwd().parent.glob("**/private.yaml"))[0]
-    else:
-        PATH = PATH[0]
-
-    LOG_PATH = list(Path().cwd().glob("**/logg.txt"))
-    if LOG_PATH == []:
-        LOG_PATH = list(Path().cwd().parent.glob("**/logg.txt"))[0]
-    else:
-        LOG_PATH = LOG_PATH[0]
+    # PATH = list(Path().cwd().glob("**/private.yaml"))
+    # if PATH == []:
+    #     PATH = list(Path().cwd().parent.glob("**/private.yaml"))[0]
+    # else:
+    #     PATH = PATH[0]
 
     try:
-        with open(PATH) as file:
+        with open(PRIVATE) as file:
             credentials = yaml.load(file, Loader=yaml.SafeLoader)
 
         CONSUMER_KEY = credentials["YFPY_CONSUMER_KEY"]
@@ -59,13 +54,13 @@ def data_pipeline():
         log_print(
             error=e,
             module_="app.py",
-            today=PATH,
+            today=PRIVATE,
             credentials="Credential File",
             at_line="16",
         )
 
     league = league_season_data(
-        auth_dir=PATH.parent,
+        auth_dir=PRIVATE.parent,
         league_id=LEAGUE_ID,
         game_id=GAME_ID,
         game_code="nfl",

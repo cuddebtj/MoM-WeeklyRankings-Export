@@ -13,18 +13,19 @@ from tournament import (
     playoff_weeks_calc,
 )
 from cust_logging import log_print, log_print_tourney
+from assests import PRIVATE, TEAMS
 
-PATH = list(Path().cwd().glob("**/private.yaml"))
-if PATH == []:
-    PATH = list(Path().cwd().parent.glob("**/private.yaml"))[0]
-else:
-    PATH = PATH[0]
+# PATH = list(Path().cwd().glob("**/private.yaml"))
+# if PATH == []:
+#     PATH = list(Path().cwd().parent.glob("**/private.yaml"))[0]
+# else:
+#     PATH = PATH[0]
 
-TEAMS_FILE = list(Path().cwd().glob("**/teams.yaml"))
-if TEAMS_FILE == []:
-    TEAMS_FILE = list(Path().cwd().parent.glob("**/teams.yaml"))[0]
-else:
-    TEAMS_FILE = TEAMS_FILE[0]
+# TEAMS_FILE = list(Path().cwd().glob("**/teams.yaml"))
+# if TEAMS_FILE == []:
+#     TEAMS_FILE = list(Path().cwd().parent.glob("**/teams.yaml"))[0]
+# else:
+#     TEAMS_FILE = TEAMS_FILE[0]
 
 
 def get_laborday(date):
@@ -49,7 +50,7 @@ def nfl_weeks_pull():
     Function to call assests files for Yahoo API Query
     """
     try:
-        db_cursor = DatabaseCursor(PATH)
+        db_cursor = DatabaseCursor(PRIVATE)
         nfl_weeks = db_cursor.copy_from_psql("SELECT DISTINCT * FROM prod.nfl_weeks")
         nfl_weeks["week_end"] = nfl_weeks["week_end"].astype("datetime64[D]")
         nfl_weeks["week_start"] = nfl_weeks["week_start"].astype("datetime64[D]")
@@ -64,11 +65,11 @@ def game_keys_pull():
     Function to call game_keys
     """
     try:
-        db_cursor = DatabaseCursor(PATH)
+        db_cursor = DatabaseCursor(PRIVATE)
         game_keys = db_cursor.copy_from_psql("SELECT DISTINCT * FROM prod.game_keys")
 
         if game_keys.empty:
-            with open(TEAMS_FILE, "r") as file:
+            with open(TEAMS, "r") as file:
                 c_teams = yaml.load(file, Loader=yaml.SafeLoader)
             game_keys = pd.DataFrame.from_dict(c_teams["teams"])
             game_keys = game_keys[["game_id", "league_id", "year"]]
@@ -76,13 +77,13 @@ def game_keys_pull():
         log_print(
             module_="utils.py",
             func="game_keys_pull",
-            path=str(TEAMS_FILE),
+            path=str(TEAMS),
         )
         return game_keys
 
     except Exception as e:
         log_print(
-            error=e, module_="utils.py", func="game_keys_pull", path=str(TEAMS_FILE)
+            error=e, module_="utils.py", func="game_keys_pull", path=str(TEAMS)
         )
 
 
@@ -127,11 +128,11 @@ FROM raw.matchups \
 WHERE game_id = {str(game_id)}"
         teams_query = f"SELECT DISTINCT * FROM raw.teams WHERE game_id = {str(game_id)}"
         settings_query = f"SELECT DISTINCT playoff_start_week, game_id FROM prod.settings WHERE game_id = {str(game_id)}"
-        matchups = DatabaseCursor(PATH).copy_from_psql(matchups_query).drop_duplicates()
+        matchups = DatabaseCursor(PRIVATE).copy_from_psql(matchups_query).drop_duplicates()
 
-        teams = DatabaseCursor(PATH).copy_from_psql(teams_query).drop_duplicates()
+        teams = DatabaseCursor(PRIVATE).copy_from_psql(teams_query).drop_duplicates()
 
-        settings = DatabaseCursor(PATH).copy_from_psql(settings_query).drop_duplicates()
+        settings = DatabaseCursor(PRIVATE).copy_from_psql(settings_query).drop_duplicates()
 
         matchups_a = matchups.copy()
         matchups_b = matchups.copy()
@@ -441,12 +442,12 @@ WHERE game_id = {str(game_id)}"
 
             query_1 = f"SELECT * FROM raw.teams WHERE game_id != {str(game_id)}"
 
-            data_upload(teams, "raw.teams", PATH, query_1)
+            data_upload(teams, "raw.teams", PRIVATE, query_1)
 
         query_2 = (
             f"SELECT * FROM prod.reg_season_results WHERE game_id != {str(game_id)}"
         )
-        data_upload(reg_season_final, "prod.reg_season_results", PATH, query_2)
+        data_upload(reg_season_final, "prod.reg_season_results", PRIVATE, query_2)
 
         return reg_season_final
 
@@ -476,7 +477,7 @@ JOIN prod.metadata met \
 on met.game_id = set.game_id \
 and met.league_id = set.league_id \
 WHERE set.game_id = {str(game_id)}"
-        settings = DatabaseCursor(PATH).copy_from_psql(settings_query).drop_duplicates()
+        settings = DatabaseCursor(PRIVATE).copy_from_psql(settings_query).drop_duplicates()
 
         one_playoff_season_query = f'SELECT pts.game_id, \
 pts.week as "Week", \
@@ -491,7 +492,7 @@ JOIN raw.teams tm \
 on tm.team_key = pts.team_key \
 WHERE pts.game_id = {str(game_id)}'
         one_playoff_season = (
-            DatabaseCursor(PATH)
+            DatabaseCursor(PRIVATE)
             .copy_from_psql(one_playoff_season_query)
             .drop_duplicates()
         )
@@ -709,7 +710,7 @@ WHERE pts.game_id = {str(game_id)}'
 
         query = f"SELECT * FROM prod.playoff_board WHERE game_id != {str(game_id)}"
 
-        data_upload(one_playoff_season, "prod.playoff_board", PATH, query)
+        data_upload(one_playoff_season, "prod.playoff_board", PRIVATE, query)
 
         return one_playoff_season
 

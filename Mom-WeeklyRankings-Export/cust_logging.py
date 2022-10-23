@@ -1,17 +1,7 @@
 from pathlib import Path
 import time
 
-TOURNEY_PATH = list(Path().cwd().glob("**/tournament_results.txt"))
-if TOURNEY_PATH == []:
-    TOURNEY_PATH = list(Path().cwd().parent.glob("**/tournament_results.txt"))[0]
-else:
-    TOURNEY_PATH = TOURNEY_PATH[0]
-
-LOG_PATH = list(Path().cwd().glob("**/logg.txt"))
-if LOG_PATH == []:
-    LOG_PATH = list(Path().cwd().parent.glob("**/logg.txt"))[0]
-else:
-    LOG_PATH = LOG_PATH[0]
+from assests import LOGG_TXT, TOURNEY_TXT
 
 
 def log_print(error=None, success=None, **kwargs):
@@ -19,7 +9,7 @@ def log_print(error=None, success=None, **kwargs):
     some info here
     """
     items = ""
-    with open(LOG_PATH, "a") as file:
+    with open(LOGG_TXT, "a") as file:
         if error:
             if kwargs:
                 for k, v in kwargs.items():
@@ -40,7 +30,7 @@ def log_print_tourney(bracket=None, round_=None, final=None, **kwargs):
     some text here
     """
     items = ""
-    with open(TOURNEY_PATH, "a") as file:
+    with open(TOURNEY_TXT, "a") as file:
         if bracket:
             for key, val in final.items():
                 items += f"\t{key}: -> {val}\n"
