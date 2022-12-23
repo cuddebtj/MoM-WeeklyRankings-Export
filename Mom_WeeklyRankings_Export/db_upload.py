@@ -3,7 +3,7 @@ import yaml
 import pandas as pd
 from io import StringIO
 
-from cust_logging import log_print
+from Mom_WeeklyRankings_Export.cust_logging import log_print
 
 
 class DatabaseCursor(object):

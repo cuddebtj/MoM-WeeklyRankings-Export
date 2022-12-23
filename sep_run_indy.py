@@ -4,10 +4,16 @@ import yaml
 from pathlib import Path
 from time import time
 
-from utils import get_laborday, nfl_weeks_pull, game_keys_pull, reg_season, post_season
-from cust_logging import log_print
-from yahoo_data import league_season_data
-from assests import PRIVATE
+from Mom_WeeklyRankings_Export.utils import (
+    get_laborday,
+    nfl_weeks_pull,
+    game_keys_pull,
+    reg_season,
+    post_season,
+)
+from Mom_WeeklyRankings_Export.cust_logging import log_print
+from Mom_WeeklyRankings_Export.yahoo_data import league_season_data
+from assests.assests import PRIVATE, TEAMS
 
 
 def data_pipeline():
@@ -21,9 +27,9 @@ def data_pipeline():
         CONSUMER_SECRET = credentials["YFPY_CONSUMER_SECRET"]
         DATE = np.datetime64(date, "D")
 
-        NFL_WEEKS = nfl_weeks_pull()
+        NFL_WEEKS = nfl_weeks_pull(PRIVATE)
         START_OF_SEASON, SEASON = get_laborday(DATE)
-        GAME_KEYS = game_keys_pull()
+        GAME_KEYS = game_keys_pull(PRIVATE, TEAMS)
 
         LEAGUE_ID = GAME_KEYS[GAME_KEYS["season"] == SEASON]["league_id"].values[0]
         GAME_ID = GAME_KEYS[GAME_KEYS["season"] == SEASON]["game_id"].values[0]
@@ -70,8 +76,8 @@ def data_pipeline():
     # league.matchups(nfl_week=CURRENT_WEEK)
     # league.weekly_points(nfl_week=CURRENT_WEEK)
     league.teams()
-    reg_season(GAME_ID)
-    post_season(GAME_ID)
+    reg_season(GAME_ID, PRIVATE)
+    post_season(GAME_ID, PRIVATE)
     end = time()
     log_print(
         success="Individual Run",
@@ -82,5 +88,6 @@ def data_pipeline():
         time_to_complete=(end - start) / 60,
     )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     data_pipeline()

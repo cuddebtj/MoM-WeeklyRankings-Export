@@ -1,15 +1,16 @@
 from pathlib import Path
 import time
 
-from assests import LOGG_TXT, TOURNEY_TXT
-
 
 def log_print(error=None, success=None, **kwargs):
     """
     some info here
     """
     items = ""
-    with open(LOGG_TXT, "a") as file:
+    with open(
+        "C:/Users/cudde/Documents/Python Projects/MoM-WebSite/MoM-WeeklyRankings-Export/assests/logg.txt",
+        "a",
+    ) as file:
         if error:
             if kwargs:
                 for k, v in kwargs.items():
@@ -30,7 +31,10 @@ def log_print_tourney(bracket=None, round_=None, final=None, **kwargs):
     some text here
     """
     items = ""
-    with open(TOURNEY_TXT, "a") as file:
+    with open(
+        "C:/Users/cudde/Documents/Python Projects/MoM-WebSite/MoM-WeeklyRankings-Export/assests/tournament_results.txt",
+        "a",
+    ) as file:
         if bracket:
             for key, val in final.items():
                 items += f"\t{key}: -> {val}\n"

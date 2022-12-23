@@ -8,10 +8,9 @@ from yfpy import YahooFantasySportsQuery
 from yfpy.utils import complex_json_handler, unpack_data
 from yfpy import get_logger
 
-from db_upload import DatabaseCursor
-from utils import data_upload
-from cust_logging import log_print
-from assests import PRIVATE, TEAMS
+from Mom_WeeklyRankings_Export.db_upload import DatabaseCursor
+from Mom_WeeklyRankings_Export.utils import data_upload
+from Mom_WeeklyRankings_Export.cust_logging import log_print
 
 # PATH = list(Path().cwd().glob("**/private.yaml"))
 # if PATH == []:
@@ -39,12 +38,14 @@ class league_season_data(object):
         game_id=None,
         game_code="nfl",
         offline=False,
-        all_output_as_json=False,
+        all_output_as_json_str=False,
         consumer_key=None,
         consumer_secret=None,
         browser_callback=True,
     ):
         self._auth_dir = auth_dir
+        self._private_file = auth_dir / "assests/private.yaml"
+        self._teams_file = auth_dir / "assests/teams.yaml"
         self._consumer_key = str(consumer_key)
         self._consumer_secret = str(consumer_secret)
         self._browser_callback = browser_callback
@@ -54,7 +55,7 @@ class league_season_data(object):
         self.game_code = str(game_code)
 
         self.offline = offline
-        self.all_output_as_json = all_output_as_json
+        self.all_output_as_json_str = all_output_as_json_str
 
         self.yahoo_query = YahooFantasySportsQuery(
             auth_dir=self._auth_dir,
@@ -62,7 +63,7 @@ class league_season_data(object):
             game_id=self.game_id,
             game_code=self.game_code,
             offline=self.offline,
-            all_output_as_json=self.all_output_as_json,
+            all_output_as_json_str=self.all_output_as_json_str,
             consumer_key=self._consumer_key,
             consumer_secret=self._consumer_secret,
             browser_callback=self._browser_callback,
@@ -162,7 +163,7 @@ league_id"
                 df=league_metadata,
                 table_name="prod.metadata",
                 query=query,
-                path=PRIVATE,
+                path=self._private_file,
             )
 
             return league_metadata
@@ -283,7 +284,7 @@ league_id"
                 df=league_settings,
                 table_name="prod.settings",
                 query=query_1,
-                path=PRIVATE,
+                path=self._private_file,
             )
 
             return league_settings
@@ -547,7 +548,7 @@ team_a_team_key"
                 df=matchups,
                 table_name="raw.matchups",
                 query=query,
-                path=PRIVATE,
+                path=self._private_file,
             )
 
             return matchups
@@ -634,7 +635,7 @@ team_a_team_key"
             teams_standings["game_id"] = self.game_id
             teams_standings["league_id"] = self.league_id
 
-            with open(TEAMS, "r") as file:
+            with open(self._teams_file, "r") as file:
                 c_teams = yaml.load(file, Loader=yaml.SafeLoader)
 
             correct_teams = pd.DataFrame.from_dict(c_teams["teams"])
@@ -782,7 +783,7 @@ team_id'
                 df=teams_standings,
                 table_name="raw.teams",
                 query=query,
-                path=PRIVATE,
+                path=self._private_file,
             )
 
             return teams_standings
@@ -801,7 +802,7 @@ team_id'
         """
         try:
             sql_query = f"SELECT DISTINCT max_teams FROM prod.settings WHERE game_id = {str(self.game_id)}"
-            teams = DatabaseCursor(PRIVATE).copy_from_psql(sql_query)
+            teams = DatabaseCursor(self._private_file).copy_from_psql(sql_query)
             teams = teams["max_teams"].values[0]
 
             team_points_weekly = pd.DataFrame()
@@ -938,7 +939,7 @@ team_id"
                 df=team_points_weekly,
                 table_name="raw.weekly_team_pts",
                 query=query,
-                path=PRIVATE,
+                path=self._private_file,
             )
 
             return team_points_weekly
@@ -959,7 +960,7 @@ team_id"
         try:
             response = unpack_data(self.yahoo_query.get_all_yahoo_fantasy_game_keys())
             try:
-                with open(TEAMS, "r") as file:
+                with open(self._teams_file, "r") as file:
                     c_teams = yaml.load(file, Loader=yaml.SafeLoader)
 
                 keys = pd.DataFrame.from_dict(c_teams["teams"])
@@ -995,7 +996,7 @@ team_id"
             data_upload(
                 df=game_keys,
                 table_name="prod.game_keys",
-                path=PRIVATE,
+                path=self._private_file,
                 query=query,
             )
 
@@ -1014,7 +1015,7 @@ team_id"
         stuff here
         """
         try:
-            game_keys = DatabaseCursor(PRIVATE).copy_from_psql(
+            game_keys = DatabaseCursor(self._private_file).copy_from_psql(
                 "SELECT DISTINCT game_id FROM prod.game_keys"
             )
             game_id = list(game_keys["game_id"])
@@ -1045,7 +1046,7 @@ team_id"
             data_upload(
                 df=weeks,
                 table_name="prod.nfl_weeks",
-                path=PRIVATE,
+                path=self._private_file,
                 query=query,
             )
 

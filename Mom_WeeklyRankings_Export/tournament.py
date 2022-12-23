@@ -1,7 +1,7 @@
 import math
 import pandas as pd
 
-from cust_logging import log_print_tourney
+from Mom_WeeklyRankings_Export.cust_logging import log_print_tourney
 
 
 def postseason_teams(

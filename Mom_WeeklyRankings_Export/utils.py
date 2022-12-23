@@ -4,16 +4,15 @@ import yaml
 from pathlib import Path
 import calendar
 
-from db_upload import DatabaseCursor
-from tournament import (
+from Mom_WeeklyRankings_Export.db_upload import DatabaseCursor
+from Mom_WeeklyRankings_Export.tournament import (
     Tournament,
     curr_playoff_picture,
     competition_rounds,
     postseason_teams,
     playoff_weeks_calc,
 )
-from cust_logging import log_print, log_print_tourney
-from assests import PRIVATE, TEAMS
+from Mom_WeeklyRankings_Export.cust_logging import log_print, log_print_tourney
 
 # PATH = list(Path().cwd().glob("**/private.yaml"))
 # if PATH == []:
@@ -45,12 +44,12 @@ def get_laborday(date):
         return cal[1][0], cal[1][0].year
 
 
-def nfl_weeks_pull():
+def nfl_weeks_pull(private_file):
     """
     Function to call assests files for Yahoo API Query
     """
     try:
-        db_cursor = DatabaseCursor(PRIVATE)
+        db_cursor = DatabaseCursor(private_file)
         nfl_weeks = db_cursor.copy_from_psql("SELECT DISTINCT * FROM prod.nfl_weeks")
         nfl_weeks["week_end"] = nfl_weeks["week_end"].astype("datetime64[D]")
         nfl_weeks["week_start"] = nfl_weeks["week_start"].astype("datetime64[D]")
@@ -60,16 +59,16 @@ def nfl_weeks_pull():
         log_print(error=e, module_="utils.py", func="nfl_weeks_pull")
 
 
-def game_keys_pull():
+def game_keys_pull(private_file, teams_file):
     """
     Function to call game_keys
     """
     try:
-        db_cursor = DatabaseCursor(PRIVATE)
+        db_cursor = DatabaseCursor(private_file)
         game_keys = db_cursor.copy_from_psql("SELECT DISTINCT * FROM prod.game_keys")
 
         if game_keys.empty:
-            with open(TEAMS, "r") as file:
+            with open(teams_file, "r") as file:
                 c_teams = yaml.load(file, Loader=yaml.SafeLoader)
             game_keys = pd.DataFrame.from_dict(c_teams["teams"])
             game_keys = game_keys[["game_id", "league_id", "year"]]
@@ -77,13 +76,13 @@ def game_keys_pull():
         log_print(
             module_="utils.py",
             func="game_keys_pull",
-            path=str(TEAMS),
+            path=str(teams_file),
         )
         return game_keys
 
     except Exception as e:
         log_print(
-            error=e, module_="utils.py", func="game_keys_pull", path=str(TEAMS)
+            error=e, module_="utils.py", func="game_keys_pull", path=str(teams_file)
         )
 
 
@@ -106,7 +105,7 @@ def data_upload(df: pd.DataFrame, table_name, path, query):
         )
 
 
-def reg_season(game_id):
+def reg_season(game_id, private_file):
     """
     Fucntion to calculate regular season rankings, scores, wins/losses, and matchups
     """
@@ -128,11 +127,21 @@ FROM raw.matchups \
 WHERE game_id = {str(game_id)}"
         teams_query = f"SELECT DISTINCT * FROM raw.teams WHERE game_id = {str(game_id)}"
         settings_query = f"SELECT DISTINCT playoff_start_week, game_id FROM prod.settings WHERE game_id = {str(game_id)}"
-        matchups = DatabaseCursor(PRIVATE).copy_from_psql(matchups_query).drop_duplicates()
+        matchups = (
+            DatabaseCursor(private_file)
+            .copy_from_psql(matchups_query)
+            .drop_duplicates()
+        )
 
-        teams = DatabaseCursor(PRIVATE).copy_from_psql(teams_query).drop_duplicates()
+        teams = (
+            DatabaseCursor(private_file).copy_from_psql(teams_query).drop_duplicates()
+        )
 
-        settings = DatabaseCursor(PRIVATE).copy_from_psql(settings_query).drop_duplicates()
+        settings = (
+            DatabaseCursor(private_file)
+            .copy_from_psql(settings_query)
+            .drop_duplicates()
+        )
 
         matchups_a = matchups.copy()
         matchups_b = matchups.copy()
@@ -161,11 +170,20 @@ WHERE game_id = {str(game_id)}"
 
         reg_season = matchups[
             (matchups["game_id"] == game_id) & (matchups["week"] < playoff_start_week)
-        ]
+        ].copy(deep=True)
 
-        reg_season["Wk W/L"] = np.where(
-            reg_season["team_a_points"] > reg_season["team_b_points"], "W", "L"
-        )
+        del matchups, matchups_a, matchups_b, matchups_b_cols, rename_columns, settings
+
+        reg_season.loc[
+            (reg_season["team_a_points"] > reg_season["team_b_points"]), ["Wk W/L"]
+        ] = "W"
+        reg_season.loc[
+            (reg_season["team_a_points"] < reg_season["team_b_points"]), ["Wk W/L"]
+        ] = "L"
+        reg_season.loc[
+            (reg_season["team_a_points"] == reg_season["team_b_points"]), ["Wk W/L"]
+        ] = "T"
+
         reg_season["Wk Pts Rk"] = (
             reg_season.groupby(["week", "game_id"])["team_a_points"]
             .rank("first", ascending=False)
@@ -176,9 +194,10 @@ WHERE game_id = {str(game_id)}"
             .rank("first", ascending=False)
             .astype(int)
         )
-        reg_season["Wk Pts W/L"] = np.where(reg_season["Wk Pts Rk"] <= 5, 1, 0).astype(
-            int
-        )
+
+        reg_season.loc[(reg_season["Wk Pts Rk"] <= 5), ["Wk Pts W/L"]] = 1
+        reg_season.loc[(reg_season["Wk Pts Rk"] > 5), ["Wk Pts W/L"]] = 0
+        reg_season["Wk Pts W/L"] = reg_season["Wk Pts W/L"].astype(int)
 
         reg_season["Opp Wk Pts Rk"] = (
             reg_season.groupby(["week", "game_id"])["team_b_points"]
@@ -399,7 +418,9 @@ WHERE game_id = {str(game_id)}"
                 "Opp Wk Pro. Pts Rk",
                 "rk_tuple",
             ]
-        ]
+        ].copy(deep=True)
+
+        del reg_season
 
         if game_id >= 390:
             max_week = reg_season_final["Week"].max()
@@ -442,12 +463,12 @@ WHERE game_id = {str(game_id)}"
 
             query_1 = f"SELECT * FROM raw.teams WHERE game_id != {str(game_id)}"
 
-            data_upload(teams, "raw.teams", PRIVATE, query_1)
+            data_upload(teams, "raw.teams", private_file, query_1)
 
         query_2 = (
             f"SELECT * FROM prod.reg_season_results WHERE game_id != {str(game_id)}"
         )
-        data_upload(reg_season_final, "prod.reg_season_results", PRIVATE, query_2)
+        data_upload(reg_season_final, "prod.reg_season_results", private_file, query_2)
 
         return reg_season_final
 
@@ -461,7 +482,7 @@ WHERE game_id = {str(game_id)}"
         )
 
 
-def post_season(game_id):
+def post_season(game_id, private_file):
     """
     Function to calculate post_season winners/losers, create final rank for the season
     """
@@ -477,7 +498,11 @@ JOIN prod.metadata met \
 on met.game_id = set.game_id \
 and met.league_id = set.league_id \
 WHERE set.game_id = {str(game_id)}"
-        settings = DatabaseCursor(PRIVATE).copy_from_psql(settings_query).drop_duplicates()
+        settings = (
+            DatabaseCursor(private_file)
+            .copy_from_psql(settings_query)
+            .drop_duplicates()
+        )
 
         one_playoff_season_query = f'SELECT pts.game_id, \
 pts.week as "Week", \
@@ -492,7 +517,7 @@ JOIN raw.teams tm \
 on tm.team_key = pts.team_key \
 WHERE pts.game_id = {str(game_id)}'
         one_playoff_season = (
-            DatabaseCursor(PRIVATE)
+            DatabaseCursor(private_file)
             .copy_from_psql(one_playoff_season_query)
             .drop_duplicates()
         )
@@ -582,25 +607,16 @@ WHERE pts.game_id = {str(game_id)}'
         if playoff_weeks:
             for week in playoff_weeks:
                 competition_rounds(playoff_bracket, "Playoff", week, one_playoff_season)
-                curr_playoff_picture(
-                    playoff_bracket, one_playoff_season, week + 1, "Playoff"
-                )
 
         if conso_weeks:
             for week in conso_weeks:
                 competition_rounds(
                     conso_bracket, "Consolation", week, one_playoff_season
                 )
-                curr_playoff_picture(
-                    conso_bracket, one_playoff_season, current_week + 1, "Consolation"
-                )
 
         if toilet_weeks:
             for week in toilet_weeks:
                 competition_rounds(toilet_bracket, "Toilet", week, one_playoff_season)
-                curr_playoff_picture(
-                    toilet_bracket, one_playoff_season, current_week + 1, "Toilet"
-                )
 
         if current_week == playoff_end_week:
             log_print_tourney(bracket="Playoffs", final=playoff_bracket.get_final())
@@ -710,7 +726,7 @@ WHERE pts.game_id = {str(game_id)}'
 
         query = f"SELECT * FROM prod.playoff_board WHERE game_id != {str(game_id)}"
 
-        data_upload(one_playoff_season, "prod.playoff_board", PRIVATE, query)
+        data_upload(one_playoff_season, "prod.playoff_board", private_file, query)
 
         return one_playoff_season
 
