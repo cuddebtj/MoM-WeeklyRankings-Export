@@ -8,7 +8,7 @@ def log_print(error=None, success=None, **kwargs):
     """
     items = ""
     with open(
-        "C:/Users/cudde/Documents/Python Projects/MoM-WebSite/MoM-WeeklyRankings-Export/assests/logg.txt",
+        "/home/cuddebtj/Documents/Python/MoM-WeeklyRankings-Export/assests/logg.txt",
         "a",
     ) as file:
         if error:
@@ -32,7 +32,7 @@ def log_print_tourney(bracket=None, round_=None, final=None, **kwargs):
     """
     items = ""
     with open(
-        "C:/Users/cudde/Documents/Python Projects/MoM-WebSite/MoM-WeeklyRankings-Export/assests/tournament_results.txt",
+        "/home/cuddebtj/Documents/Python/MoM-WeeklyRankings-Export/assests/tournament_results.txt",
         "a",
     ) as file:
         if bracket:
