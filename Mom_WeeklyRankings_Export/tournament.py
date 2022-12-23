@@ -176,8 +176,8 @@ def competition_rounds(bracket, type, week, season_df):
         season_df.loc[left_comp_mask, "Opp Wk Pts"] = right_score
         season_df.loc[left_comp_mask, "Opp Wk Pro. Pts"] = right_pro_score
 
-        season_df.loc[right_comp_mask, "Bracket"] = f"{type} R {week}"
-        season_df.loc[left_comp_mask, "Bracket"] = f"{type} R {week}"
+        season_df.loc[right_comp_mask, "Bracket"] = f"{type}"
+        season_df.loc[left_comp_mask, "Bracket"] = f"{type}"
 
         if right_score > left_score:
             match.set_winner(right_comp)

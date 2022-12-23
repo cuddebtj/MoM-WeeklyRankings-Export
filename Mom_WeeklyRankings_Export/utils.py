@@ -579,7 +579,7 @@ WHERE pts.game_id = {str(game_id)}'
             conso_bracket = Tournament(conso_teams)
             if current_week < playoff_start_week:
                 curr_playoff_picture(
-                    conso_bracket, one_playoff_season, current_week, "Consolation"
+                    conso_bracket, one_playoff_season, current_week, "Conso"
                 )
         else:
             conso_bracket = None
@@ -611,7 +611,7 @@ WHERE pts.game_id = {str(game_id)}'
         if conso_weeks:
             for week in conso_weeks:
                 competition_rounds(
-                    conso_bracket, "Consolation", week, one_playoff_season
+                    conso_bracket, "Conso", week, one_playoff_season
                 )
 
         if toilet_weeks:
@@ -625,7 +625,7 @@ WHERE pts.game_id = {str(game_id)}'
                     one_playoff_season["team_key"] == tm
                 ) & playoff_end_week_mask
                 one_playoff_season.loc[finish_mask, "Finish"] = int(rk)
-                one_playoff_season.loc[finish_mask, "Bracket"] = "Playoff Final"
+                one_playoff_season.loc[finish_mask, "Bracket"] = "Playoff"
 
             log_print_tourney(bracket="Consolation", final=conso_bracket.get_final())
             for rk, tm in conso_bracket.get_final().items():
@@ -635,7 +635,7 @@ WHERE pts.game_id = {str(game_id)}'
                 one_playoff_season.loc[finish_mask, "Finish"] = int(
                     int(rk) + len(playoff_teams)
                 )
-                one_playoff_season.loc[finish_mask, "Bracket"] = "Consolation Final"
+                one_playoff_season.loc[finish_mask, "Bracket"] = "Conso"
 
             log_print_tourney(bracket="Toliet", final=toilet_bracket.get_final())
             for rk, tm in toilet_bracket.get_final().items():
@@ -647,7 +647,7 @@ WHERE pts.game_id = {str(game_id)}'
                     + len(playoff_teams)
                     + (len(conso_teams) if conso_teams else 0)
                 )
-                one_playoff_season.loc[finish_mask, "Bracket"] = "Toliet Final"
+                one_playoff_season.loc[finish_mask, "Bracket"] = "Toliet"
 
             one_playoff_season.loc[
                 playoff_end_week_mask, "Finish"
