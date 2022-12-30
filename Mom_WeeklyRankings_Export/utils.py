@@ -619,35 +619,44 @@ WHERE pts.game_id = {str(game_id)}'
                 competition_rounds(toilet_bracket, "Toilet", week, one_playoff_season)
 
         if current_week == playoff_end_week:
-            log_print_tourney(bracket="Playoffs", final=playoff_bracket.get_final())
-            for rk, tm in playoff_bracket.get_final().items():
-                finish_mask = (
-                    one_playoff_season["team_key"] == tm
-                ) & playoff_end_week_mask
-                one_playoff_season.loc[finish_mask, "Finish"] = int(rk)
-                one_playoff_season.loc[finish_mask, "Bracket"] = "Playoff"
+            try:
+                log_print_tourney(bracket="Playoffs", final=playoff_bracket.get_final())
+                for rk, tm in playoff_bracket.get_final().items():
+                    finish_mask = (
+                        one_playoff_season["team_key"] == tm
+                    ) & playoff_end_week_mask
+                    one_playoff_season.loc[finish_mask, "Finish"] = int(rk)
+                    one_playoff_season.loc[finish_mask, "Bracket"] = "Playoff"
+            except:
+                pass
 
-            log_print_tourney(bracket="Consolation", final=conso_bracket.get_final())
-            for rk, tm in conso_bracket.get_final().items():
-                finish_mask = (
-                    one_playoff_season["team_key"] == tm
-                ) & playoff_end_week_mask
-                one_playoff_season.loc[finish_mask, "Finish"] = int(
-                    int(rk) + len(playoff_teams)
-                )
-                one_playoff_season.loc[finish_mask, "Bracket"] = "Conso"
+            try:
+                log_print_tourney(bracket="Consolation", final=conso_bracket.get_final())
+                for rk, tm in conso_bracket.get_final().items():
+                    finish_mask = (
+                        one_playoff_season["team_key"] == tm
+                    ) & playoff_end_week_mask
+                    one_playoff_season.loc[finish_mask, "Finish"] = int(
+                        int(rk) + len(playoff_teams)
+                    )
+                    one_playoff_season.loc[finish_mask, "Bracket"] = "Conso"
+            except:
+                pass
 
-            log_print_tourney(bracket="Toliet", final=toilet_bracket.get_final())
-            for rk, tm in toilet_bracket.get_final().items():
-                finish_mask = (
-                    one_playoff_season["team_key"] == tm
-                ) & playoff_end_week_mask
-                one_playoff_season.loc[finish_mask, "Finish"] = int(
-                    int(rk)
-                    + len(playoff_teams)
-                    + (len(conso_teams) if conso_teams else 0)
-                )
-                one_playoff_season.loc[finish_mask, "Bracket"] = "Toliet"
+            try:
+                log_print_tourney(bracket="Toliet", final=toilet_bracket.get_final())
+                for rk, tm in toilet_bracket.get_final().items():
+                    finish_mask = (
+                        one_playoff_season["team_key"] == tm
+                    ) & playoff_end_week_mask
+                    one_playoff_season.loc[finish_mask, "Finish"] = int(
+                        int(rk)
+                        + len(playoff_teams)
+                        + (len(conso_teams) if conso_teams else 0)
+                    )
+                    one_playoff_season.loc[finish_mask, "Bracket"] = "Toliet"
+            except:
+                pass
 
             one_playoff_season.loc[
                 playoff_end_week_mask, "Finish"
