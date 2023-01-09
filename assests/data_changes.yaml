@@ -1,0 +1,12 @@
+weeks:
+- week: 17
+  changes:
+  - manager: "Tim"
+    points: 100.46
+    team_key: "414.l.77446.t.1"
+  - manager: "Chris"
+    points: 131.86
+    team_key: "414.l.77446.t.9"
+  - manager: "Jeremy"
+    points: 108.3
+    team_key: "414.l.77446.t.8"

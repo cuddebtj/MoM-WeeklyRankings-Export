@@ -610,9 +610,7 @@ WHERE pts.game_id = {str(game_id)}'
 
         if conso_weeks:
             for week in conso_weeks:
-                competition_rounds(
-                    conso_bracket, "Conso", week, one_playoff_season
-                )
+                competition_rounds(conso_bracket, "Conso", week, one_playoff_season)
 
         if toilet_weeks:
             for week in toilet_weeks:
@@ -631,7 +629,9 @@ WHERE pts.game_id = {str(game_id)}'
                 pass
 
             try:
-                log_print_tourney(bracket="Consolation", final=conso_bracket.get_final())
+                log_print_tourney(
+                    bracket="Consolation", final=conso_bracket.get_final()
+                )
                 for rk, tm in conso_bracket.get_final().items():
                     finish_mask = (
                         one_playoff_season["team_key"] == tm
